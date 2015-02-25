@@ -30,6 +30,26 @@ bool obs_x264_encode(void *data, struct encoder_frame *frame,
 /*---------------------------------------------------------------------------*/
 /* Secondary and Helper Functions */
 
+#define do_log(level, format, ...) \
+	blog(level, "[openmax encoder: '%s'] " format, \
+			obs_encoder_get_name(omxil->encoder), ##__VA_ARGS__)
+#define error(format, ...) do_log(LOG_ERROR,   "ERROR: " format, ##__VA_ARGS__)
+#define warn(format, ...)  do_log(LOG_WARNING, "WARN: "  format, ##__VA_ARGS__)
+#define info(format, ...)  do_log(LOG_INFO,    "INFO: "  format, ##__VA_ARGS__)
+#define debug(format, ...) do_log(LOG_DEBUG,   "DEBUG: " format, ##__VA_ARGS__)
+
+#define OMX_INIT_STRUCTURE(a) \
+    memset(&(a), 0, sizeof(a)); \
+    (a).nSize = sizeof(a)
+#define OMX_INIT_STRUCT_VERSION(a) \
+    (a).nVersion.nVersion = OMX_VERSION; \
+    (a).nVersion.s.nVersionMajor = OMX_VERSION_MAJOR; \
+    (a).nVersion.s.nVersionMinor = OMX_VERSION_MINOR; \
+    (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
+    (a).nVersion.s.nStep = OMX_VERSION_STEP
+
+void openmax_omx_error(struct obs_openmax *omxil, OMX_ERRORTYPE error);
+
 /*---------------------------------------------------------------------------*/
 /* Properties UI Functions */
 void openmax_defaults(obs_data_t *settings);
@@ -61,6 +81,19 @@ struct obs_encoder_info openmax_encoder = {
 };
 
 struct obs_openmax {
-	obs_encoder_t  *encoder;
-	OMX_HANDLETYPE *omx_component;
+	obs_encoder_t          *encoder;
+
+	OMX_HANDLETYPE         *omx_component;
+	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_in;
+	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_out;
+
+	DARRAY(uint8_t)        packet_data;
+
+	uint8_t                *extra_data;
+	uint8_t                *sei;
+
+	size_t                 extra_data_size;
+	size_t                 sei_size;
+
+	os_performance_token_t *performance_token;
 };

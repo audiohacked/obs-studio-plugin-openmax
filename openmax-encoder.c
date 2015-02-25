@@ -39,25 +39,100 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 		return NULL;
 	}
 	/* Setup ports */
-	OMX_PARAM_PORTDEFINITIONTYPE encoder_portdef;
 	/* setup input buffer */
+	OMX_PARAM_PORTDEFINITIONTYPE input;
+	OMX_INIT_STRUCTURE(input);
+	input.nPortIndex = 200;
+	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &input)) != OMX_ErrorNone) {
+		error("Failed to get port definition for encoder input port 200");
+	}
+	input.format.video.nFrameWidth  = VIDEO_WIDTH;
+	input.format.video.nFrameHeight = VIDEO_HEIGHT;
+	input.format.video.xFramerate   = VIDEO_FRAMERATE << 16;
+	input.format.video.nStride      = (input.format.video.nFrameWidth + input.nBufferAlignment - 1) & (~(input.nBufferAlignment - 1));
+	input.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
+
 	/* setup output buffer */
+	OMX_PARAM_PORTDEFINITIONTYPE output;
+	OMX_INIT_STRUCTURE(output);
+	output.nPortIndex = 200;
+	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &output)) != OMX_ErrorNone) {
+		error("Failed to get port definition for encoder input port 200");
+	}
+	output.nPortIndex = 201;
+	output.format.video.eColorFormat = OMX_COLOR_FormatUnused;
+	output.format.video.eCompressionFormat = OMX_VIDEO_CodingAVC;
+	// Which one is effective, this or the configuration just below?
+	// output.format.video.nBitrate     = VIDEO_BITRATE;
+	if((r = OMX_SetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &output)) != OMX_ErrorNone) {
+		error("Failed to set port definition for encoder output port 201");
+	}
+
 	/* configure bitrate */
 	OMX_VIDEO_PARAM_BITRATETYPE bitrate;
 	OMX_INIT_STRUCTURE(bitrate);
 	bitrate.eControlRate = OMX_Video_ControlRateVariable;
 	bitrate.nTargetBitrate = encoder_portdef.format.video.nBitrate;
 	bitrate.nPortIndex = 201;
-	if((r = OMX_SetParameter(ctx.encoder, OMX_IndexParamVideoBitrate, &bitrate)) != OMX_ErrorNone) {
-		omx_die(r, "Failed to set bitrate for encoder output port 201");
+	if((r = OMX_SetParameter(omxil->omx_component, OMX_IndexParamVideoBitrate, &bitrate)) != OMX_ErrorNone) {
+		error("Failed to set bitrate for encoder output port 201");
 	}
+
 	/* configure image format */
 	OMX_VIDEO_PARAM_PORTFORMATTYPE format;
+	OMX_INIT_STRUCTURE(format);
+	format.nPortIndex = 201;
+	format.eCompressionFormat = OMX_VIDEO_CodingAVC;
+	if((r = OMX_SetParameter(omxil->omx_component, OMX_IndexParamVideoPortFormat, &format)) != OMX_ErrorNone) {
+		error("Failed to set video format for encoder output port 201");
+	}
+
 	/* switch component to idle state */
+	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandStateSet, OMX_StateIdle, NULL)) != OMX_ErrorNone) {
+		error("Failed to switch state of the encoder component to idle");
+	}
+	block_until_state_changed(omxil->omx_component, OMX_StateIdle);
+
 	/* enable ports */
+	/* enable input port */
+	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 200, NULL)) != OMX_ErrorNone) {
+		error("Failed to enable encoder input port 200");
+	}
+	block_until_port_changed(omxil->omx_component, 200, OMX_TRUE);
+
+	/* enable output port */
+	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 201, NULL)) != OMX_ErrorNone) {
+		error("Failed to enable encoder output port 201");
+	}
+	block_until_port_changed(omxil->omx_component, 201, OMX_TRUE);
+
 	/* allocate input/output buffers */
+	/* allocate input buffer */
+	OMX_INIT_STRUCTURE(input);
+	input.nPortIndex = 200;
+	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &input)) != OMX_ErrorNone) {
+		error("Failed to get port definition for encoder input port 200");
+	}
+	if((r = OMX_AllocateBuffer(omxil->omx_component, &omxil->encoder_ppBuffer_in, 200, NULL, input.nBufferSize)) != OMX_ErrorNone) {
+		error("Failed to allocate buffer for encoder input port 200");
+	}
+
+	/* allocate output buffer */
+	OMX_INIT_STRUCTURE(output);
+	output.nPortIndex = 201;
+	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &output)) != OMX_ErrorNone) {
+		error("Failed to get port definition for encoder output port 201");
+	}
+	if((r = OMX_AllocateBuffer(omxil->omx_component, &omxil->encoder_ppBuffer_out, 201, NULL, output.nBufferSize)) != OMX_ErrorNone) {
+		error("Failed to allocate buffer for encoder output port 201");
+	}
+
 	/* switch component to executing state */
-	
+	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandStateSet, OMX_StateExecuting, NULL)) != OMX_ErrorNone) {
+		error("Failed to switch state of the encoder component to executing");
+	}
+	block_until_state_changed(omxil->omx_component, OMX_StateExecuting);
+
 	return omxil;
 }
 
