@@ -15,16 +15,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
-#include <IL/OMX_Core.h>
-#include <IL/OMX_Component.h>
-#include <IL/OMX_Video.h>
+#pragma once
+#include <stdio.h>
+#include <util/dstr.h>
+#include <util/darray.h>
+#include <util/platform.h>
+#include <obs-module.h>
+
+#include <OMX_Core.h>
+#include <OMX_Component.h>
+#include <OMX_Video.h>
 
 /*---------------------------------------------------------------------------*/
 /* Primary Functions */
-const char *openmax_get_name(void);
-void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder);
-void obs_x264_destroy(void *data);
-bool obs_x264_encode(void *data, struct encoder_frame *frame,
+extern const char *openmax_get_name(void);
+extern void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder);
+extern void openmax_destroy(void *data);
+extern bool openmax_encode(void *data, struct encoder_frame *frame,
 		struct encoder_packet *packet, bool *received_packet);
 
 /*---------------------------------------------------------------------------*/
@@ -41,6 +48,7 @@ bool obs_x264_encode(void *data, struct encoder_frame *frame,
 #define OMX_INIT_STRUCTURE(a) \
     memset(&(a), 0, sizeof(a)); \
     (a).nSize = sizeof(a)
+
 #define OMX_INIT_STRUCT_VERSION(a) \
     (a).nVersion.nVersion = OMX_VERSION; \
     (a).nVersion.s.nVersionMajor = OMX_VERSION_MAJOR; \
@@ -48,37 +56,31 @@ bool obs_x264_encode(void *data, struct encoder_frame *frame,
     (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
     (a).nVersion.s.nStep = OMX_VERSION_STEP
 
-void openmax_omx_error(struct obs_openmax *omxil, OMX_ERRORTYPE error);
+extern void openmax_omx_error(struct obs_openmax *omxil, OMX_ERRORTYPE error);
+extern void block_until_state_changed(OMX_HANDLETYPE hComponent, OMX_STATETYPE wanted_eState);
+extern void block_until_port_changed(OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled);
+extern void block_until_flushed(struct obs_openmax *omxil);
+
+#define VIDEO_WIDTH obs_encoder_get_width(omxil->encoder)
+#define VIDEO_HEIGHT obs_encoder_get_height(omxil->encoder)
+#define VIDEO_FRAMERATE 60
+#define VIDEO_BITRATE 50000
+#define STRING_ENCODER (OMX_STRING)obs_data_get_string(settings, "component_name")
 
 /*---------------------------------------------------------------------------*/
 /* Properties UI Functions */
-void openmax_defaults(obs_data_t *settings);
-obs_properties_t *openmax_properties(void *unused);
+extern void openmax_defaults(obs_data_t *settings);
+extern obs_properties_t *openmax_properties(void *unused);
 
 /*---------------------------------------------------------------------------*/
 /* "Optional" Functions */
-bool obs_x264_update(void *data, obs_data_t *settings);
-bool obs_x264_extra_data(void *data, uint8_t **extra_data, size_t *size);
-bool obs_x264_sei(void *data, uint8_t **sei, size_t *size);
-bool obs_x264_video_info(void *data, struct video_scale_info *info);
+extern bool openmax_update(void *data, obs_data_t *settings);
+extern bool openmax_extra_data(void *data, uint8_t **extra_data, size_t *size);
+extern bool openmax_sei(void *data, uint8_t **sei, size_t *size);
+extern bool openmax_video_info(void *data, struct video_scale_info *info);
 
 /*---------------------------------------------------------------------------*/
 /* Data Structures */
-struct obs_encoder_info openmax_encoder = {
-	.id             = "openmax-encoder",
-	.type           = OBS_VIDEO_ENCODER,
-	.codec          = "h264",
-	.get_name       = openmax_get_name,
-	.create         = openmax_create,
-	.destroy        = openmax_destroy,
-	.encode         = openmax_encode,
-	.update         = openmax_update,
-	.get_properties = openmax_properties,
-	.get_defaults   = openmax_defaults,
-	.get_extra_data = openmax_extra_data,
-	.get_sei_data   = openmax_sei,
-	.get_video_info = openmax_video_info
-};
 
 struct obs_openmax {
 	obs_encoder_t          *encoder;
@@ -97,3 +99,4 @@ struct obs_openmax {
 
 	os_performance_token_t *performance_token;
 };
+

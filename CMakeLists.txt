@@ -16,8 +16,8 @@ set(linux-openmax_SOURCES
 )
 
 add_library(linux-openmax MODULE
-	${obs-openmax_SOURCES}
-	${obs-openmax_HEADERS})
+	${linux-openmax_SOURCES}
+	${linux-openmax_HEADERS})
 
 target_link_libraries(linux-openmax
 	libobs

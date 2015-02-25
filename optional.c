@@ -16,19 +16,19 @@
 ******************************************************************************/
 #include "openmax.h"
 
-bool obs_x264_update(void *data, obs_data_t *settings)
+bool openmax_update(void *data, obs_data_t *settings)
 {// updates encoder info
 	return false;
 }
-bool obs_x264_extra_data(void *data, uint8_t **extra_data, size_t *size)
+bool openmax_extra_data(void *data, uint8_t **extra_data, size_t *size)
 {
 	return false;
 }
-bool obs_x264_sei(void *data, uint8_t **sei, size_t *size)
+bool openmax_sei(void *data, uint8_t **sei, size_t *size)
 {
 	return false;
 }
-bool obs_x264_video_info(void *data, struct video_scale_info *info)
+bool openmax_video_info(void *data, struct video_scale_info *info)
 {
 	return false;
 }

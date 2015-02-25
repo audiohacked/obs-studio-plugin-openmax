@@ -30,6 +30,6 @@ obs_properties_t *openmax_properties(void *unused)
 
 	obs_properties_t *props = obs_properties_create();
 
-	obs_properies_add_text(props, "component_name", TEXT_COMPONENT_NAME, TEXT_COMPONENT_DEFAULT);
+	obs_properties_add_text(props, "component_name", TEXT_COMPONENT_NAME, OBS_TEXT_DEFAULT);
 	return props;
 }

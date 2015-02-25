@@ -17,13 +17,30 @@
 
 #include <obs-module.h>
 
+#include "openmax.h"
+
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("linux-openmax", "en-US")
 
-extern struct obs_encoder_info openmax_encoder;
+struct obs_encoder_info openmax_encoder = {
+	.id             = "openmax-encoder",
+	.type           = OBS_ENCODER_VIDEO,
+	.codec          = "h264",
+	.get_name       = openmax_get_name,
+	.create         = openmax_create,
+	.destroy        = openmax_destroy,
+	.encode         = openmax_encode,
+	.update         = openmax_update,
+	.get_properties = openmax_properties,
+	.get_defaults   = openmax_defaults,
+	.get_extra_data = openmax_extra_data,
+	.get_sei_data   = openmax_sei,
+	.get_video_info = openmax_video_info
+};
 
 bool obs_module_load(void)
 {
 	obs_register_source(&openmax_encoder);
 	return true;
 }
+

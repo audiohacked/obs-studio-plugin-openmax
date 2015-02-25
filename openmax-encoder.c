@@ -34,7 +34,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	}
 
 	/* Initialize Component */
-	if ((r = OMX_GetHandle()) != OMX_ErrorNone) {
+	if ((r = OMX_GetHandle(omxil->omx_component, STRING_ENCODER, NULL, NULL)) != OMX_ErrorNone) {
 		error("Component initialization failed!");
 		return NULL;
 	}
@@ -63,7 +63,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	output.format.video.eColorFormat = OMX_COLOR_FormatUnused;
 	output.format.video.eCompressionFormat = OMX_VIDEO_CodingAVC;
 	// Which one is effective, this or the configuration just below?
-	// output.format.video.nBitrate     = VIDEO_BITRATE;
+	output.format.video.nBitrate     = VIDEO_BITRATE;
 	if((r = OMX_SetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &output)) != OMX_ErrorNone) {
 		error("Failed to set port definition for encoder output port 201");
 	}
@@ -72,7 +72,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	OMX_VIDEO_PARAM_BITRATETYPE bitrate;
 	OMX_INIT_STRUCTURE(bitrate);
 	bitrate.eControlRate = OMX_Video_ControlRateVariable;
-	bitrate.nTargetBitrate = encoder_portdef.format.video.nBitrate;
+	bitrate.nTargetBitrate = output.format.video.nBitrate;
 	bitrate.nPortIndex = 201;
 	if((r = OMX_SetParameter(omxil->omx_component, OMX_IndexParamVideoBitrate, &bitrate)) != OMX_ErrorNone) {
 		error("Failed to set bitrate for encoder output port 201");
@@ -136,7 +136,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	return omxil;
 }
 
-void obs_x264_destroy(void *data)
+void openmax_destroy(void *data)
 {
 	struct obs_openmax *omxil = data;
 	/* Flush buffers */
@@ -147,7 +147,7 @@ void obs_x264_destroy(void *data)
 	/* Free remaining OBS structures */
 }
 
-bool obs_x264_encode(void *data, struct encoder_frame *frame,
+bool openmax_encode(void *data, struct encoder_frame *frame,
 		struct encoder_packet *packet, bool *received_packet)
 {
 	struct obs_openmax *omxil = data;
