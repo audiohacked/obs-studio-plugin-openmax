@@ -17,11 +17,11 @@
 #include "openmax.h"
 
 #define TEXT_COMPONENT_NAME obs_module_text("OMXComponent_name")
-#define TEXT_COMPONENT_DEFAULT "OMX.mesa.video_encode.avc"
+#define TEXT_COMPONENT_DEFAULT "OMX.mesa.video_encode"
 
 void openmax_defaults(obs_data_t *settings)
 {
-	obs_data_set_default_string(settings, "component_name", "OMX.mesa.video_encode.avc");
+	obs_data_set_default_string(settings, "component_name", "OMX.mesa.video_encode");
 }
 	
 obs_properties_t *openmax_properties(void *unused)

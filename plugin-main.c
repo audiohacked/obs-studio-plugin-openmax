@@ -40,7 +40,7 @@ struct obs_encoder_info openmax_encoder = {
 
 bool obs_module_load(void)
 {
-	obs_register_source(&openmax_encoder);
+	obs_register_encoder(&openmax_encoder);
 	return true;
 }
 
