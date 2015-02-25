@@ -31,18 +31,22 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	UNUSED_PARAMETER(settings);
 	
 	/* Initialize OpenMAX IL */
+	debug("init omx");
 	if ((r = OMX_Init()) != OMX_ErrorNone) {
 		error("OMX initialization failed!");
 		return NULL;
 	}
 
 	/* Initialize Component */
+	debug("init component");
 	if ((r = OMX_GetHandle(omxil->omx_component, STRING_ENCODER, NULL, NULL)) != OMX_ErrorNone) {
 		error("Component initialization failed!");
 		return NULL;
 	}
+
 	/* Setup ports */
 	/* setup input buffer */
+	debug("setup input buffer");
 	OMX_PARAM_PORTDEFINITIONTYPE input;
 	OMX_INIT_STRUCTURE(input);
 	input.nPortIndex = 200;
@@ -56,6 +60,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	input.format.video.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
 
 	/* setup output buffer */
+	debug("setup output buffer");
 	OMX_PARAM_PORTDEFINITIONTYPE output;
 	OMX_INIT_STRUCTURE(output);
 	output.nPortIndex = 200;
@@ -91,6 +96,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	}
 
 	/* switch component to idle state */
+	debug("switch component to idle");
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandStateSet, OMX_StateIdle, NULL)) != OMX_ErrorNone) {
 		error("Failed to switch state of the encoder component to idle");
 	}
@@ -98,12 +104,14 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 
 	/* enable ports */
 	/* enable input port */
+	debug("enable input port");
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 200, NULL)) != OMX_ErrorNone) {
 		error("Failed to enable encoder input port 200");
 	}
 	block_until_port_changed(omxil, omxil->omx_component, 200, OMX_TRUE);
 
 	/* enable output port */
+	debug("enable output port");
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 201, NULL)) != OMX_ErrorNone) {
 		error("Failed to enable encoder output port 201");
 	}
@@ -111,6 +119,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 
 	/* allocate input/output buffers */
 	/* allocate input buffer */
+	debug("allocate input buffer");
 	OMX_INIT_STRUCTURE(input);
 	input.nPortIndex = 200;
 	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &input)) != OMX_ErrorNone) {
@@ -121,6 +130,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	}
 
 	/* allocate output buffer */
+	debug("allocate output buffer");
 	OMX_INIT_STRUCTURE(output);
 	output.nPortIndex = 201;
 	if((r = OMX_GetParameter(omxil->omx_component, OMX_IndexParamPortDefinition, &output)) != OMX_ErrorNone) {
@@ -131,6 +141,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	}
 
 	/* switch component to executing state */
+	debug("switch component to executing state");
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandStateSet, OMX_StateExecuting, NULL)) != OMX_ErrorNone) {
 		error("Failed to switch state of the encoder component to executing");
 	}
