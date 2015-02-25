@@ -17,6 +17,12 @@
 
 #include "openmax.h"
 
+#define VIDEO_WIDTH obs_encoder_get_width(omxil->encoder)
+#define VIDEO_HEIGHT obs_encoder_get_height(omxil->encoder)
+#define VIDEO_FRAMERATE 60
+#define VIDEO_BITRATE 50000
+#define STRING_ENCODER obs_data_get_string(settings, "component_name")
+
 const char *openmax_get_name(void)
 {
 	return "OpenMAX IL";
@@ -39,7 +45,7 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 
 	/* Initialize Component */
 	debug("init component");
-	if ((r = OMX_GetHandle(omxil->omx_component, STRING_ENCODER, NULL, NULL)) != OMX_ErrorNone) {
+	if ((r = OMX_GetHandle(omxil->omx_component, (OMX_STRING)STRING_ENCODER, NULL, NULL)) != OMX_ErrorNone) {
 		error("Component initialization failed!");
 		return NULL;
 	}

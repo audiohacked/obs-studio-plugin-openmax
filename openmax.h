@@ -83,12 +83,6 @@ extern void block_until_state_changed(OMX_HANDLETYPE hComponent, OMX_STATETYPE w
 extern void block_until_port_changed(struct obs_openmax *omxil, OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled);
 extern void block_until_flushed(struct obs_openmax *omxil);
 
-#define VIDEO_WIDTH obs_encoder_get_width(omxil->encoder)
-#define VIDEO_HEIGHT obs_encoder_get_height(omxil->encoder)
-#define VIDEO_FRAMERATE 60
-#define VIDEO_BITRATE 50000
-#define STRING_ENCODER (OMX_STRING)obs_data_get_string(settings, "component_name")
-
 /*---------------------------------------------------------------------------*/
 /* Properties UI Functions */
 extern void openmax_defaults(obs_data_t *settings);
