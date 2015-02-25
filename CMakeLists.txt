@@ -13,6 +13,7 @@ set(linux-openmax_SOURCES
 	openmax-encoder.c
 	properties.c
 	optional.c
+	helpers.c
 )
 
 add_library(linux-openmax MODULE

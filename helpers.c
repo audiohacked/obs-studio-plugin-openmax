@@ -41,12 +41,12 @@ void block_until_state_changed(OMX_HANDLETYPE hComponent, OMX_STATETYPE wanted_e
     while(i++ == 0 || eState != wanted_eState) {
         OMX_GetState(hComponent, &eState);
         if(eState != wanted_eState) {
-            usleep(10000);
+            os_sleep_ms(10);
         }
     }
 }
 
-void block_until_port_changed(OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled) {
+void block_until_port_changed(struct obs_openmax *omxil, OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled) {
     OMX_ERRORTYPE r;
     OMX_PARAM_PORTDEFINITIONTYPE portdef;
     OMX_INIT_STRUCTURE(portdef);
@@ -57,22 +57,22 @@ void block_until_port_changed(OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX
             error("Failed to get port definition");
         }
         if(portdef.bEnabled != bEnabled) {
-            usleep(10000);
+            os_sleep_ms(10);
         }
     }
 }
 
-void block_until_flushed(appctx *ctx) {
+void block_until_flushed(struct obs_openmax *omxil) {
     int quit;
     while(!quit) {
-        vcos_semaphore_wait(&ctx->handler_lock);
-        if(ctx->flushed) {
-            ctx->flushed = 0;
+        //vcos_semaphore_wait(&ctx->handler_lock);
+        if(omxil->flushed) {
+            omxil->flushed = 0;
             quit = 1;
         }
-        vcos_semaphore_post(&ctx->handler_lock);
+        //vos_semaphore_post(&ctx->handler_lock);
         if(!quit) {
-            usleep(10000);
+            os_sleep_ms(10);
         }
     }
 }

@@ -25,7 +25,10 @@ const char *openmax_get_name(void)
 void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 {
 	struct obs_openmax *omxil = bzalloc(sizeof(struct obs_openmax));
+	omxil->encoder = encoder;
+
 	OMX_ERRORTYPE r;
+	UNUSED_PARAMETER(settings);
 	
 	/* Initialize OpenMAX IL */
 	if ((r = OMX_Init()) != OMX_ErrorNone) {
@@ -98,13 +101,13 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 200, NULL)) != OMX_ErrorNone) {
 		error("Failed to enable encoder input port 200");
 	}
-	block_until_port_changed(omxil->omx_component, 200, OMX_TRUE);
+	block_until_port_changed(omxil, omxil->omx_component, 200, OMX_TRUE);
 
 	/* enable output port */
 	if((r = OMX_SendCommand(omxil->omx_component, OMX_CommandPortEnable, 201, NULL)) != OMX_ErrorNone) {
 		error("Failed to enable encoder output port 201");
 	}
-	block_until_port_changed(omxil->omx_component, 201, OMX_TRUE);
+	block_until_port_changed(omxil, omxil->omx_component, 201, OMX_TRUE);
 
 	/* allocate input/output buffers */
 	/* allocate input buffer */
@@ -138,7 +141,8 @@ void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder)
 
 void openmax_destroy(void *data)
 {
-	struct obs_openmax *omxil = data;
+	UNUSED_PARAMETER(data);
+	//struct obs_openmax *omxil = data;
 	/* Flush buffers */
 	/* Disable Ports */
 	/* Free the buffers */
@@ -150,8 +154,11 @@ void openmax_destroy(void *data)
 bool openmax_encode(void *data, struct encoder_frame *frame,
 		struct encoder_packet *packet, bool *received_packet)
 {
-	struct obs_openmax *omxil = data;
-
+	UNUSED_PARAMETER(data);
+	UNUSED_PARAMETER(frame);
+	UNUSED_PARAMETER(packet);
+	//struct obs_openmax *omxil = data;
+	
 	*received_packet = false;
 	return false;
 }

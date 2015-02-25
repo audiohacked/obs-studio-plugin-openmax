@@ -27,6 +27,28 @@
 #include <OMX_Video.h>
 
 /*---------------------------------------------------------------------------*/
+/* Data Structures */
+
+struct obs_openmax {
+	obs_encoder_t          *encoder;
+
+	OMX_HANDLETYPE         *omx_component;
+	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_in;
+	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_out;
+
+	DARRAY(uint8_t)        packet_data;
+
+	uint8_t                *extra_data;
+	uint8_t                *sei;
+
+	size_t                 extra_data_size;
+	size_t                 sei_size;
+
+	os_performance_token_t *performance_token;
+	int                    flushed;
+};
+
+/*---------------------------------------------------------------------------*/
 /* Primary Functions */
 extern const char *openmax_get_name(void);
 extern void *openmax_create(obs_data_t *settings, obs_encoder_t *encoder);
@@ -58,7 +80,7 @@ extern bool openmax_encode(void *data, struct encoder_frame *frame,
 
 extern void openmax_omx_error(struct obs_openmax *omxil, OMX_ERRORTYPE error);
 extern void block_until_state_changed(OMX_HANDLETYPE hComponent, OMX_STATETYPE wanted_eState);
-extern void block_until_port_changed(OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled);
+extern void block_until_port_changed(struct obs_openmax *omxil, OMX_HANDLETYPE hComponent, OMX_U32 nPortIndex, OMX_BOOL bEnabled);
 extern void block_until_flushed(struct obs_openmax *omxil);
 
 #define VIDEO_WIDTH obs_encoder_get_width(omxil->encoder)
@@ -78,25 +100,4 @@ extern bool openmax_update(void *data, obs_data_t *settings);
 extern bool openmax_extra_data(void *data, uint8_t **extra_data, size_t *size);
 extern bool openmax_sei(void *data, uint8_t **sei, size_t *size);
 extern bool openmax_video_info(void *data, struct video_scale_info *info);
-
-/*---------------------------------------------------------------------------*/
-/* Data Structures */
-
-struct obs_openmax {
-	obs_encoder_t          *encoder;
-
-	OMX_HANDLETYPE         *omx_component;
-	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_in;
-	OMX_BUFFERHEADERTYPE   *encoder_ppBuffer_out;
-
-	DARRAY(uint8_t)        packet_data;
-
-	uint8_t                *extra_data;
-	uint8_t                *sei;
-
-	size_t                 extra_data_size;
-	size_t                 sei_size;
-
-	os_performance_token_t *performance_token;
-};
 
