@@ -18,17 +18,30 @@
 
 bool openmax_update(void *data, obs_data_t *settings)
 {// updates encoder info
+	UNUSED_PARAMETER(data);
+	UNUSED_PARAMETER(settings);
 	return false;
 }
+
 bool openmax_extra_data(void *data, uint8_t **extra_data, size_t *size)
 {
+	UNUSED_PARAMETER(data);
+	UNUSED_PARAMETER(extra_data);
+	UNUSED_PARAMETER(size);
 	return false;
 }
+
 bool openmax_sei(void *data, uint8_t **sei, size_t *size)
 {
+	UNUSED_PARAMETER(data);
+	UNUSED_PARAMETER(sei);
+	UNUSED_PARAMETER(size);
 	return false;
 }
+
 bool openmax_video_info(void *data, struct video_scale_info *info)
 {
+	UNUSED_PARAMETER(data);
+	UNUSED_PARAMETER(info);
 	return false;
 }
